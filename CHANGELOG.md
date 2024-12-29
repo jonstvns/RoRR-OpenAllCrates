@@ -1,5 +1,5 @@
 ### v1.1.1
-* Fix for compatibility with RoRR_Modding_Toolkit v1.2.8
+* Fix for compatibility with RoRR_Modding_Toolkit v1.2.8 (Credit to [CrimsonGin](https://github.com/CrimsonGin))
 
 ### v1.1.0
 * Fix broken code due to dependency updates
