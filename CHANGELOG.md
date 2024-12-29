@@ -1,3 +1,6 @@
+### v1.1.1
+* Fix for compatibility with RoRR_Modding_Toolkit v1.2.8
+
 ### v1.1.0
 * Fix broken code due to dependency updates
 * Improve performance when many crates are spawned in the level

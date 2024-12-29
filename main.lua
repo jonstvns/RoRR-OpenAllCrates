@@ -10,7 +10,7 @@ mods.on_all_mods_loaded(function() for _, m in pairs(mods) do if type(m) == "tab
 	mod_state = {}
 	mod_state.is_running = false
 	mod_state.crate = nil
-	
+
 end)
 
 -- Toml Helper
@@ -64,7 +64,7 @@ local function get_sprite_index(obj_id)
 		end
 	end
 
-	
+
 	local equipment_arr = gm.variable_global_get("class_equipment")
 	for _, equip in ipairs(equipment_arr) do
 		-- compare object id
@@ -74,65 +74,65 @@ local function get_sprite_index(obj_id)
 			return equip[8]
 		end
 	end
-	
+
 	log_info("sprite index not found for obj id " .. obj_id)
-	
+
 	return -4.0
 end
 
 gui.add_to_menu_bar(function()
 	local pressed = false
 	local changed = false
-	
+
 	ImGui.Spacing()
 	ImGui.Text("Hotkeys")
 	ImGui.Indent()
-	
+
 	pressed, mod_config.hotkey_open_crates = ImGui.Hotkey("Open Crates", mod_config.hotkey_open_crates)
 	if pressed then changed = true end
-	
+
 	ImGui.Unindent()
 	ImGui.Spacing()
 	ImGui.Text("HUD")
 	ImGui.Indent()
-	
+
 	mod_config.show_hud, pressed = ImGui.Checkbox("Show HUD", mod_config.show_hud)
 	if pressed then changed = true end
-	
+
 	mod_config.hud_scale, pressed = ImGui.DragFloat("Scale", mod_config.hud_scale, 0.01, 0.1, 4)
 	if pressed then changed = true end
-	
+
 	mod_config.hud_position_x, pressed = ImGui.DragFloat("Position X", mod_config.hud_position_x, 0.001, 0, 1)
 	if pressed then changed = true end
-	
+
 	mod_config.hud_position_y, pressed = ImGui.DragFloat("Position Y", mod_config.hud_position_y, 0.001, 0, 1)
 	if pressed then changed = true end
-	
+
 	mod_config.hud_element_spacing, pressed = ImGui.DragFloat("Element Spacing", mod_config.hud_element_spacing)
 	if pressed then changed = true end
-	
+
 	mod_config.hud_group_spacing, pressed = ImGui.DragFloat("Group Spacing", mod_config.hud_group_spacing)
 	if pressed then changed = true end
-	
+
 	mod_config.hud_horizontal_layout, pressed = ImGui.Checkbox("Use Horizonal Layout", mod_config.hud_horizontal_layout)
 	if pressed then changed = true end
-	
+
 	mod_config.hud_rtl, pressed = ImGui.Checkbox("Draw Right to Left", mod_config.hud_rtl)
 	if pressed then changed = true end
-	
+
 	ImGui.Unindent()
 	ImGui.Spacing()
 	ImGui.Text("Debug")
 	ImGui.Indent()
-	
+
 	mod_config.enable_logs, pressed = ImGui.Checkbox("Enable Logs", mod_config.enable_logs)
 	if pressed then changed = true end
-	
+
 	mod_config.debug_draw, pressed = ImGui.Checkbox("Debug Draw", mod_config.debug_draw)
 	if pressed then changed = true end
-	
+
 	ImGui.Unindent()
-	
+
 	if changed then
 		Toml.save_cfg(plugin_name, mod_config)
 	end
@@ -142,7 +142,7 @@ gui.add_always_draw_imgui(function()
 	-- KEY_O
 	if ImGui.IsKeyPressed(mod_config.hotkey_open_crates) then
 		log_info("open crates key pressed")
-		
+
 		local crates, found = Instance.find_all(gm.constants.oCustomObject_pInteractableCrate)
 		log_info("found = " .. tostring(found))
 		for _, c in ipairs(crates) do
@@ -151,14 +151,14 @@ gui.add_always_draw_imgui(function()
 				log_info("ignore crate")
 				goto continue 
 			end
-			
+
 			local choice = last_crate_choice[c.inventory + 1]
 			if choice and choice.obj_id then
 				log_info("spawn object id " .. choice.obj_id .. " from inventory " .. c.inventory)
 				gm.item_drop_object(choice.obj_id, c.x, c.y, c.value, false)
 				gm.instance_destroy(c.value)
 			end
-			
+
 			::continue::
 		end
 	end
@@ -202,15 +202,15 @@ local function on_interactable_activate(self, other, result, args)
 		log_info("crate is open")
 		-- crate is open, disable the hotkey so we don't softlock
 		mod_state.crate = self
-		
+
 		if not last_crate_choice[self.inventory + 1] then 
 			last_crate_choice[self.inventory + 1] = {}
 			last_crate_choice[self.inventory + 1].crate_sprite = self.sprite_index
 			table.sort(last_crate_choice)
 		end
-		
+
 		local choice = last_crate_choice[self.inventory + 1]
-		
+
 	-- save selected object for currently open crate inventory
 		if self.active == 1.0 and not self.was_selection_set then
 			if choice.selection then
@@ -254,13 +254,13 @@ local draw_item_layout_horizontal = function(sprite_index, x, y, sx, sy)
 	gm.draw_sprite_ext(sprite_index, 0, x - x_offset, y + y_offset, sx, sy, 0, c_white, 1)
 	return x + (half_w - x_offset), y + half_h
 end
-	
+
 local function on_interactable_draw_hud(self, other, result, args)
 	if not mod_state or not mod_state.is_running
 	or not mod_config or not mod_config.show_hud then 
 		return 
 	end
-	
+
 	--log_hook(self, other, result, args)
 
 	local get_sprite_layout_order = function(a, b)
@@ -269,24 +269,23 @@ local function on_interactable_draw_hud(self, other, result, args)
 		end
 		return a, b
 	end
-	
+
 	local cam = gm.view_get_camera(0)
-	
 	local sx = gm_hud_scale * mod_config.hud_scale
 	local sy = gm_hud_scale * mod_config.hud_scale
 	local x_start = gm.camera_get_view_x(cam) + mod_config.hud_position_x * gm_window_width
 	local y_start = gm.camera_get_view_y(cam) + mod_config.hud_position_y * gm_window_height
 	local x = x_start
 	local y = y_start
-	
+
 	for _, choice in pairs(last_crate_choice) do
 		if choice and choice.obj_sprite then
 			local a, b = get_sprite_layout_order(choice.crate_sprite, choice.obj_sprite)
-			
+
 			x, _ = draw_item_layout(a, x, y, sx, sy, 0, 0)
 			x = x + (mod_config.hud_element_spacing * sx)
 			x, y = draw_item_layout(b, x, y, sx, sy, 0, 0)
-			
+
 			if mod_config.hud_horizontal_layout then
 				x = x + (mod_config.hud_group_spacing * sx)
 				y = y_start
@@ -301,14 +300,14 @@ local function on_interactable_draw_hud(self, other, result, args)
 		local white_crate = 533
 		local meat_chunk = 1509
 		local a, b = get_sprite_layout_order(white_crate, meat_chunk)
-			
+
 		x = x_start
 		y = y_start
-		
+
 		x, _ = draw_item_layout(a, x, y, sx, sy, 0, 0)
 		x = x + (mod_config.hud_element_spacing * sx)
 		x, y = draw_item_layout(b, x, y, sx, sy, 0, 0)
-		
+
 		if mod_config.hud_horizontal_layout then
 			x = x + (mod_config.hud_group_spacing * sx)
 			y = y_start
@@ -316,7 +315,7 @@ local function on_interactable_draw_hud(self, other, result, args)
 			x = x_start
 			y = y + (mod_config.hud_group_spacing * sy)
 		end
-		
+
 		x, _ = draw_item_layout(a, x, y, sx, sy, 0, 0)
 		x = x + (mod_config.hud_element_spacing * sx)
 		x, y = draw_item_layout(b, x, y, sx, sy, 0, 0)
@@ -348,7 +347,7 @@ gm.pre_script_hook(gm.constants.run_destroy, function(self, other, result, args)
 end)
 
 function __initialize()
-	Callback.add("preStep", "openallcrates_on_interactable_step", on_interactable_step, true)
-	Callback.add("onInteractableActivate", "openallcrates_on_interactable_activate", on_interactable_activate, true)
-	Callback.add("onHUDDraw", "openallcrates_on_interactable_draw_hud", on_interactable_draw_hud, true)
+	Callback_Raw.add("preStep", "openallcrates_on_interactable_step", on_interactable_step, true)
+	Callback_Raw.add("onInteractableActivate", "openallcrates_on_interactable_activate", on_interactable_activate, true)
+	Callback_Raw.add("onHUDDraw", "openallcrates_on_interactable_draw_hud", on_interactable_draw_hud, true)
 end
